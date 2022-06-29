@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-const pool = new Pool ({
+const pool = new Pool({
     max: 20,
     //connectionString: 'postgres://root:newPassword@localhost:port/dbname',
     connectionString: 'postgres://postgres:rootbrijesh@localhost:5432/contacts',

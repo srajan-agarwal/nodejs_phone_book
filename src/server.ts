@@ -1,44 +1,58 @@
-import express from 'express';
+import express from 'express'
+import actuator from 'express-actuator'
+import requestId from 'express-request-id'
+import dotenv from 'dotenv'
+import cookierParser from 'cookie-parser'
 import bodyParser from 'body-parser';
+import Environment from './utils/config/Environment'
+import { AddressInfo } from 'net'
 import informationRouter from './routers/InformationsRouter';
 import pool from './dbconfig/dbconnector';
 
-class Server {
-    private app: any;
+dotenv.config({ path: `.env.${Environment.getEnvironment()}` })
+// Import Logger
+import logger from './utils/Logger'
 
-    constructor() {
-        this.app = express();
-        this.config();
-        this.routerConfig();
-        this.dbConnect();
-    }
+// Import Proxy Middleware
+import { proxyMiddleware, appProxyMiddleware } from './utils/middleware/ProxyMiddleware'
+import authMiddleware from './utils/middleware/AuthMiddleware'
 
-    private config() {
-        this.app.use(bodyParser.urlencoded({ extended: true }));
-        this.app.use(bodyParser.json({ limit: '1mb' })); // 100kb default
-    }
+// Create App
+const app = express()
 
-    private dbConnect() {
-        pool.connect(function (err, client, done) {
-            if (err) {
-                console.error('Error while connectiong DB : ', err);
-                throw new Error()
-            };
-            console.log('DB Connected');
-        });
-    }
+// Add bodyParser to parse any body
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '1mb' })); // 100kb default
 
-    private routerConfig() {
-        this.app.use('/api', informationRouter);
-    }
+// Add Middleware for check health status and monitor metrics
+app.use(actuator())
 
-    public start = (port: number) => {
-        return new Promise((resolve, reject) => {
-            this.app.listen(port, () => {
-                resolve(port);
-            }).on('error', (err: Object) => reject(err));
-        });
-    }
-}
+// Add unique request ID using "request-id/express Middleware
+app.use(requestId())
 
-export default Server;
+// Add cookie Parser
+app.use(cookierParser())
+
+// Handle app Request with Proxy Middleware
+// app.use('/alps/app', authMiddleware, appProxyMiddleware)
+// app.use('/', proxyMiddleware)
+app.use('/api', informationRouter);
+
+pool.connect(function (err, client, done) {
+  if (err) {
+    console.error('Error while connectiong DB : ', err);
+    throw new Error()
+  };
+  console.log('DB Connected');
+});
+
+
+/* istanbul ignore next */
+const port = process.env.PORT || 8080
+// App Listen
+const server = app.listen(port, function () {
+  const { address } = server.address() as AddressInfo
+  logger.info(`App listening at http://${address}:${port}`)
+})
+
+export default server

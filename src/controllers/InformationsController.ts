@@ -2,6 +2,7 @@ import pool from '../dbconfig/dbconnector';
 
 class InformationsController {
 
+    // Get api to fetch all informations 
     public async get(req: any, res: any) {
         try {
             const client = await pool.connect();
@@ -22,6 +23,7 @@ class InformationsController {
         }
     }
 
+    // Post api to insert a record of one information
     public async add(req: any, res: any) {
         try {
             const name = req.body.name;
@@ -54,6 +56,8 @@ class InformationsController {
             res.status(400).send(error);
         }
     }
+
+    // Update api to update a record of information by id
     public async update(req: any, res: any) {
         try {
             const id = +req.params.id;
@@ -93,6 +97,8 @@ class InformationsController {
             res.status(400).send(error);
         }
     }
+
+    // Delete api to delete a record of information by id
     public async delete(req: any, res: any) {
         try {
             const id = req.params.id;
