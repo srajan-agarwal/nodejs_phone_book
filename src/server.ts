@@ -14,8 +14,6 @@ dotenv.config({ path: `.env.${Environment.getEnvironment()}` })
 import logger from './utils/Logger'
 
 // Import Proxy Middleware
-import { proxyMiddleware, appProxyMiddleware } from './utils/middleware/ProxyMiddleware'
-import authMiddleware from './utils/middleware/AuthMiddleware'
 
 // Create App
 const app = express()
@@ -34,8 +32,6 @@ app.use(requestId())
 app.use(cookierParser())
 
 // Handle app Request with Proxy Middleware
-// app.use('/alps/app', authMiddleware, appProxyMiddleware)
-// app.use('/', proxyMiddleware)
 app.use('/api', informationRouter);
 
 pool.connect(function (err, client, done) {

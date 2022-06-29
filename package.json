@@ -1,5 +1,5 @@
 {
-  "name": "alps-proxy-service",
+  "name": "nodejs_phone_book",
   "version": "1.0.0",
   "description": "",
   "main": "./dist/bundle",
