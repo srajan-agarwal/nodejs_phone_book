@@ -1,22 +1,15 @@
-import pool from '../dbconfig/dbconnector';
+import { Information } from "../database/models/Information";
 
 class InformationsController {
 
     // Get api to fetch all informations 
     public async get(req: any, res: any) {
         try {
-            const client = await pool.connect();
-
-            const sql = "SELECT * FROM informations";
-            const { rows } = await client.query(sql);
-            const contacts = rows;
-
-            client.release();
-
+            const results = await Information.findAll();
             res.send({
                 status: 200,
                 message: "Contacts fetched succcessfully!",
-                data: contacts
+                data: results
             });
         } catch (error) {
             res.status(400).send(error);
@@ -40,17 +33,14 @@ class InformationsController {
                 });
             }
 
-            const client = await pool.connect();
-
-            const sql = `INSERT INTO informations (name, email, phone_no, work, company, location) VALUES 
-            ('${name}', '${email}', '${phone_no}', '${work}', '${company}', '${location}')`;
-            await client.query(sql);
-
-            client.release();
+            const data = await Information.create({
+                name, email, phone_no, work, company, location
+            });
 
             res.send({
                 status: 200,
                 message: "Contact inserted succcessfully!",
+                data: data,
             });
         } catch (error) {
             res.status(400).send(error);
@@ -62,12 +52,9 @@ class InformationsController {
         try {
             const id = +req.params.id;
 
-            const client = await pool.connect();
-
-            const findOneSql = `SELECT * FROM informations WHERE id = ${id}`;
-            const { rows } = await client.query(findOneSql);
-
-            const record = rows[0];
+            const record = await Information.findOne({
+                where: { id: id },
+            });
 
             if (!record) {
                 return res.status(404).send({
@@ -83,11 +70,10 @@ class InformationsController {
             const company = req.body.company || record.company;
             const location = req.body.location || record.location;
 
-            const sql = `UPDATE informations SET name = '${name}', email = '${email}',  phone_no = '${phone_no}',  work = '${work}', 
-            company = '${company}',  location = '${location}' WHERE id = ${id};`
-            await client.query(sql);
-
-            client.release();
+            await Information.update(
+                { name, email, phone_no, work, company, location },
+                { where: { id: id } }
+            );
 
             res.send({
                 status: 200,
@@ -101,13 +87,11 @@ class InformationsController {
     // Delete api to delete a record of information by id
     public async delete(req: any, res: any) {
         try {
-            const id = req.params.id;
-            const client = await pool.connect();
+            const id = +req.params.id;
 
-            const findOneSql = `SELECT * FROM informations WHERE id = ${id}`;
-            const { rows } = await client.query(findOneSql);
-
-            const record = rows[0];
+            const record = await Information.findOne({
+                where: { id: id },
+            });
 
             if (!record) {
                 return res.status(404).send({
@@ -116,10 +100,9 @@ class InformationsController {
                 });
             }
 
-            const sql = `DELETE FROM informations WHERE id = ${id}`;
-            await client.query(sql);
-
-            client.release();
+            await Information.destroy({
+                where: { id: id },
+            });
 
             res.send({
                 status: 200,

@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 import Environment from './utils/config/Environment'
 import { AddressInfo } from 'net'
 import informationRouter from './routers/InformationsRouter';
-import pool from './dbconfig/dbconnector';
+import { initDB } from "./dbconfig";
 
 dotenv.config({ path: `.env.${Environment.getEnvironment()}` })
 // Import Logger
@@ -34,13 +34,9 @@ app.use(cookierParser())
 // Handle app Request with Proxy Middleware
 app.use('/api', informationRouter);
 
-pool.connect(function (err, client, done) {
-  if (err) {
-    console.error('Error while connectiong DB : ', err);
-    throw new Error()
-  };
-  console.log('DB Connected');
-});
+// Database initialization
+initDB();
+
 
 
 /* istanbul ignore next */
