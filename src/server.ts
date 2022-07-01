@@ -4,14 +4,12 @@ import requestId from 'express-request-id'
 import dotenv from 'dotenv'
 import cookierParser from 'cookie-parser'
 import bodyParser from 'body-parser';
-import Environment from './utils/config/Environment'
 import { AddressInfo } from 'net'
 import informationRouter from './routers/InformationsRouter';
 import { initDB } from "./dbconfig";
 
-dotenv.config({ path: `.env.${Environment.getEnvironment()}` })
+dotenv.config()
 // Import Logger
-import logger from './utils/Logger'
 
 // Import Proxy Middleware
 
@@ -37,14 +35,12 @@ app.use('/api', informationRouter);
 // Database initialization
 initDB();
 
-
-
 /* istanbul ignore next */
 const port = process.env.PORT || 8080
 // App Listen
 const server = app.listen(port, function () {
   const { address } = server.address() as AddressInfo
-  logger.info(`App listening at http://${address}:${port}`)
+  console.log(`App listening at http://${address}:${port}`);
 })
 
 export default server
